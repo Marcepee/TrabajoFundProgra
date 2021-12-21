@@ -2,177 +2,64 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Locale;
 
 class Lista {
-	String[] lista;
-	int len;
-	int objetivos;
-	public Lista(int len) {
-	this.lista= new String[len];
-	this.len=0;
-	this.objetivos=0;
+	String[] hijas;
+	int lenHijas;
+	String[] objetivos;
+	String[] aciertos;
+	int numAciertos;
+	int numObjetivos;
+	int objetivosAcertados;
+	String palabraObj;
+	Lector leer;
+
+	public Lista(int numObjetivos, String nombreArchivo) {
+		this.numObjetivos = numObjetivos;
+		numAciertos=0;
+		objetivosAcertados=0;
+		leer = new Lector(nombreArchivo);
+		aciertos = new String[0];
 	}
-	public void aumentarObj() {
-		this.objetivos++;
-		this.len++;
-	}
-	
-	public void aumentarLen() {
-		this.len++;
-	}
 
-
-}
-
-public class Juego {
-
-	public static void main(String[] args) {
-		Scanner in = new Scanner(System.in);
-		int opc = 1;
-		int puntos = 0;
-		while (opc == 1) {
-			puntos = jugar(in);
-			System.out.println("Quieres seguir jugando?\n 1 = Si\n 0 = No");
-			opc = in.nextInt();
+	private int numPalabrasAncestro() {
+		int cont = 0;
+		Scanner dc = leer.leerArchivo();
+		while (dc.hasNextLine()) {
+			if (dc.nextLine().length() > 5) {
+				cont++;
+			}
 		}
-		in.close();
-		System.out.println("Programa terminado con exito");
-		System.out.println("Puntos: " + puntos);
-
+		return cont;
 	}
-	
-	public static int jugar(Scanner in) {
-		int pos = 0;
-		int puntos= 0;
-		
-		File diccionario = new File("bin\\Diccionario.txt");
-		Scanner dc;
-		int num_Palabras=0;
-		try {
-			dc = new Scanner(diccionario);
-			String[] lista_Palabras = new String[106];
-			while (dc.hasNextLine()) {
-				lista_Palabras[pos] = dc.nextLine();
-				pos++;
-				num_Palabras++;
 
-				}
-			int palabraObj= (int) (num_Palabras * Math.random());
-			while(lista_Palabras[palabraObj].length()<6) {
-				
-			palabraObj = (int) (num_Palabras  * Math.random());		
-			}
-		
-			
-			System.out.println(lista_Palabras[palabraObj]);
-			desordenar(lista_Palabras[palabraObj]);
-			
-			
-			
-			String[] hijas= new String[200];
-			String[] objetivos= new String[6];
-			Lista aciertos= new Lista(200);
-			
-			
-			System.out.println("\n\n\nPalabras hijas:");
-			
-			int lenHijas=palabrasHijas(lista_Palabras,hijas,lista_Palabras[palabraObj], pos);
-			System.out.println("\n" +lenHijas);
-			for(int i= 0; i<lenHijas;i++) {
-				System.out.println(hijas[i]);
-			}
-			
-			objetivos[0]=lista_Palabras[palabraObj];
-			int lenObj=selObj(hijas, objetivos, lenHijas, 6);
-			
-			System.out.println("\n\n\nPalabras objetivo:");
-			
-			for(int i= 0; i<6;i++) {
-				System.out.println(objetivos[i]);
-			}
-			while(aciertos.objetivos<lenObj) {
-			puntos+=plc_hldr(objetivos,hijas,aciertos,in.next(),lenObj,lenHijas);
-				
-			
-			}
-			System.out.println("¡¡Has acertado todas las palabras objetivo!!");
-			
-			
-
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+	private void setPalabraObj() {
+		Scanner dc = leer.leerArchivo();
+		int num = numPalabrasAncestro();
+		int seleccion = (int) ((num - 1) * Math.random());
+		String[] palabrasAncestro = new String[num];
+		for (int i = 0; i < num; i++) {
+			palabrasAncestro[i] = dc.nextLine();
 		}
-		System.out.println("Pulsa enter para continuar");
-		in.nextLine();
-		in.nextLine();
-		
+		palabraObj = palabrasAncestro[seleccion];
 
-		
-		
-		return puntos;
 	}
-	
-	
-	
 
-	public static int plc_hldr(String[] objetivos, String[] hijas,Lista aciertos, String entrada, int lenObj, int lenHijas) {
-		int puntos=0;
-		
-		if(contiene(aciertos.lista,entrada,aciertos.len)) {
-			System.out.println("Ya has introducido esa palabra");
-			
-		}else {
-			if(contiene(objetivos,entrada,lenObj)) {
-				aciertos.lista[aciertos.len]=entrada;
-				aciertos.aumentarObj();
-				puntos+=3;
-				System.out.println("Has encontrado la palabra objetivo: "+entrada);
-			}else if(contiene(hijas,entrada,lenHijas)) {
-				aciertos.lista[aciertos.len]=entrada;
-				aciertos.aumentarLen();
-				puntos++;
-				System.out.println("Has encontrado la palabra bonus: "+entrada);
-			}else {
-				System.out.println(entrada+" es incorrecto");
-			}
-			
-		}
-		
-		return puntos;
-	}
-	
-	public static boolean contiene(String[] objetivos, String entrada, int length) {
-		
-		boolean acierto=false;
-			for(int cont= 0; cont<length;cont++) {
-				if (entrada.equals(objetivos[cont])) {
-					acierto=true;
-					cont=length;
-				}
-			}
-		return acierto;
-	}
-	
-	public static boolean esHija(String palabraAncestro, String palabraHija) { // comprueba que todas las letras de palabra2 //
-																		// estan en palabra1, para eso es necesario que las
-																		// dos palabras esten ordenadas
-		
+	private boolean esHija(String palabraAncestro, String palabraHija) {
+
 		char palabraAncestroChar[] = palabraAncestro.toCharArray();
 		Arrays.sort(palabraAncestroChar);
 		String palabraAncestroOrd = new String(palabraAncestroChar);
-		
-		
+
 		char palabraHijaChar[] = palabraHija.toCharArray();
 		Arrays.sort(palabraHijaChar);
 		String palabraHijaOrd = new String(palabraHijaChar);
-		
-		
-		int ind =0;
-		for (int cont =0;cont <palabraHijaOrd.length(); cont++) {
 
-			
-			if (palabraAncestroOrd.indexOf(palabraHijaOrd.charAt(cont), ind) != -1) { 
+		int ind = 0;
+		for (int cont = 0; cont < palabraHijaOrd.length(); cont++) {
+
+			if (palabraAncestroOrd.indexOf(palabraHijaOrd.charAt(cont), ind) != -1) {
 				ind = palabraAncestroOrd.indexOf(palabraHijaOrd.charAt(cont), ind);
 				ind++;
 
@@ -180,37 +67,54 @@ public class Juego {
 				return false;
 			}
 
-			
 		}
 
 		return true;
 	}
-	
-	public static int palabrasHijas(String[] lista,String[] hijas, String palabra,int length) {
-		int pos= 0;
-		for(int cont=0; cont<length; cont++) {
-			if(esHija(palabra,lista[cont])) {
-				hijas[pos]=lista[cont];
-				pos++;
+
+	private void getLenHijas() {
+		lenHijas = 0;
+		Scanner dc = leer.leerArchivo();
+		while (dc.hasNextLine()) {
+			if (esHija(palabraObj, dc.nextLine())) {
+				lenHijas++;
 			}
-			
 		}
-		
-		return pos;
 	}
-	
-	public static int selObj(String[] hijas, String[] objetivos, int lenhijas,int numObj) {
+
+	private void setHijas() {
+		setPalabraObj();
+		getLenHijas();
+		int cont = 0;
+		hijas = new String[lenHijas];
+		Scanner dc = leer.leerArchivo();
+		while (dc.hasNextLine()) {
+			String lineaDic = dc.nextLine();
+
+			if (esHija(palabraObj, lineaDic)) {
+				hijas[cont] = lineaDic;
+				cont++;
+			}
+		}
+	}
+
+	public int getObjetivos() {
+		setHijas();
+		objetivos = new String[numObjetivos];
+		
 		int[] dado;
 		int random = 0;
-		dado = new int[lenhijas];
-		for (int cont = 0; cont < lenhijas; cont++) {
+		dado = new int[lenHijas];
+		for (int cont = 0; cont < lenHijas; cont++) {
 			dado[cont] = cont;
 		}
+		objetivos[0] = palabraObj;
+		dado[0]= -1;
 		int cont = 1;
-		while (cont < numObj) {
-			random = (int) (Math.random() * lenhijas);
-			if (dado[random] != -1) {
-				objetivos[cont]=hijas[random];
+		while (cont < numObjetivos) {
+			random = (int) (Math.random() * lenHijas);
+			if (dado[random] != -1&& hijas[random].equals(palabraObj)==false) {
+				objetivos[cont] = hijas[random];
 				dado[random] = -1;
 				cont++;
 			}
@@ -218,7 +122,198 @@ public class Juego {
 		return cont;
 	}
 
-	public static void desordenar(String palabraObj) {
+	public void AñadirAciertosObj(String acierto) {
+		this.objetivosAcertados++;
+		this.numAciertos++;
+		setAciertos(acierto, aciertos);
+	}
+
+	public void añadirAciertosBonus(String acierto) {
+		numAciertos++;
+		setAciertos(acierto, aciertos);
+
+	}
+
+	private void setAciertos(String acierto, String[] aciertosIniciales) {
+		aciertos = new String[numAciertos];
+		for(int i = 0; i<aciertosIniciales.length;i++) {
+			aciertos[i]=aciertosIniciales[i];
+		}
+		aciertos[numAciertos-1] = acierto;
+
+	}
+
+}
+
+class Lector {
+	String nombreArchivo;
+
+	public Lector(String nombreArchivo) {
+		this.nombreArchivo = nombreArchivo;
+	}
+
+	public Scanner leerArchivo() {
+		Scanner dc;
+		try {
+			dc = new Scanner(new File(nombreArchivo));
+			return dc;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public boolean estaEnArchivo(String str) {
+		Scanner dc = leerArchivo();
+		while (dc.hasNextLine()) {
+			if (str.equals(dc.nextLine())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+}
+
+public class Juego {
+
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		in.useLocale(new Locale("es","ES"));
+		boolean loop=true;
+		boolean respuesta;
+		int puntos = 0;
+		 do{
+			respuesta=false;
+			puntos = jugar(in);
+			
+			while(respuesta!=true) {
+				
+				System.out.println("¿Otra Partida?");  //jugarDeNuevo();	
+				
+				String opc=in.next().toLowerCase();
+				
+				if(opc.equals("si")) {
+					
+					respuesta=true;
+					loop=true;
+					
+				}else if(opc.equals("no")) {
+					
+					respuesta=true;
+					loop=false;
+					
+				}
+				
+			}
+			
+			
+		}while (loop);
+		in.close();
+		System.out.println("Programa terminado con exito");
+		System.out.println("Puntos: " + puntos);
+
+	}
+
+	public static int jugar(Scanner in) {
+
+		int puntos = 0;
+		String nombreArchivo = "bin\\Diccionario.txt";
+		Lista lista = new Lista(6, nombreArchivo);
+		lista.getObjetivos();
+
+		System.out.println(lista.palabraObj);
+		System.out.println(desordenar(lista.palabraObj));
+
+		System.out.println("\n\n\nPalabras hijas:");
+
+		System.out.println("\n" + lista.lenHijas);
+		for (int i = 0; i < lista.lenHijas; i++) {
+			System.out.println(lista.hijas[i]);
+		}
+
+		System.out.println("\n\n\nPalabras objetivo:");
+
+		for ( int i = 0; i<lista.numObjetivos;i++) {
+			System.out.println(lista.objetivos[i]);
+		}
+
+		while (lista.objetivosAcertados < lista.numObjetivos) {
+			for (int i = 0; i < lista.numObjetivos; i++) {
+				
+				if(contiene(lista.aciertos, lista.objetivos[i], lista.numAciertos)) {
+					System.out.println(lista.objetivos[i]);
+				}else {
+					for(int cont=0;cont<lista.objetivos[i].length();cont++) {
+						System.out.print("_ ");
+					}
+					System.out.println();
+				}
+				
+			}
+			puntos += plc_hldr(lista,in.next());
+
+		}
+		System.out.println("¡¡Has acertado todas las palabras objetivo!!");
+		puntos+=25;
+		System.out.println("Pulsa enter para continuar");
+		in.nextLine();
+		in.nextLine();
+
+		return puntos;
+	}
+	
+	
+
+	public static int plc_hldr(Lista lista, String entrada) {
+		int puntos = 0;
+
+		if (lista.leer.estaEnArchivo(entrada)) {
+			if (contiene(lista.hijas, entrada, lista.lenHijas)) {
+				if (contiene(lista.aciertos, entrada, lista.numAciertos)) {
+					System.out.println("Ya has introducido esa palabra");
+				} else if (contiene(lista.objetivos, entrada, lista.numObjetivos)) {
+					System.out.println("Palabra objetivo encontrada");
+					lista.AñadirAciertosObj(entrada);
+					
+				} else {
+					System.out.println("Palabra bonus encontrada");
+					lista.añadirAciertosBonus(entrada);
+					puntos = 1;
+				}
+			} else {
+				System.out.println("No es una palabra hija");
+			}
+		} else {
+			System.out.println("La palabra no esta en el diccionario");
+		}
+
+		return puntos;
+	}
+	
+	
+	
+
+	public static boolean contiene(String[] objetivos, String entrada, int length) {
+
+		boolean acierto = false;
+		for (int cont = 0; cont < length; cont++) {
+			if (entrada.equals(objetivos[cont])) {
+				acierto = true;
+				cont = length;
+			}
+		}
+		return acierto;
+	}
+
+
+
+	
+
+	
+
+	public static String desordenar(String palabraObj) {
+		String desordenada = new String();
 		int[] dado;
 		int random = 0;
 		dado = new int[palabraObj.length()];
@@ -229,15 +324,12 @@ public class Juego {
 		while (cont < palabraObj.length()) {
 			random = (int) (Math.random() * palabraObj.length());
 			if (dado[random] != -1) {
-				System.out.print(palabraObj.charAt(random));
+				desordenada += ("" + palabraObj.charAt(random));
 				dado[random] = -1;
 				cont++;
 			}
 		}
+		return desordenada;
 	}
 
-}	
-
-	
-
-
+}
