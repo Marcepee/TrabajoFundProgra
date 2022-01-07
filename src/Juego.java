@@ -75,7 +75,7 @@ class Estado{
 		return true;
 	}
 
-	private void getLenHijas() {
+	private void setLenHijas() {
 		lenHijas = 0;
 		Scanner dc = leer.leerArchivo();
 		while (dc.hasNextLine()) {
@@ -87,7 +87,7 @@ class Estado{
 
 	private void setHijas() {
 		setPalabraObj();
-		getLenHijas();
+		setLenHijas();
 		int cont = 0;
 		hijas = new String[lenHijas];
 		Scanner dc = leer.leerArchivo();
@@ -101,7 +101,7 @@ class Estado{
 		}
 	}
 
-	public int getObjetivos() {
+	public int setObjetivos() {
 		setHijas();
 		objetivos = new String[numObjetivos];
 		
@@ -223,8 +223,9 @@ public class Juego {
 
 		int puntos = 0;
 		String nombreArchivo = "bin\\Diccionario.txt";
-		Estado estado = new Estado(6, nombreArchivo);
-		estado.getObjetivos();
+		int numObjetivos=6;
+		Estado estado = new Estado(numObjetivos, nombreArchivo);
+		estado.setObjetivos();
 
 		
 		String palabraDesordenada=new String(desordenar(estado.palabraObj));
