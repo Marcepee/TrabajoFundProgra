@@ -4,18 +4,21 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Locale;
 
-class Lista {
+class Estado{
 	String[] hijas;
-	int lenHijas;
 	String[] objetivos;
 	String[] aciertos;
+	
+	String palabraObj;
+	
+	int lenHijas;
 	int numAciertos;
 	int numObjetivos;
 	int objetivosAcertados;
-	String palabraObj;
+	
 	Lector leer;
 
-	public Lista(int numObjetivos, String nombreArchivo) {
+	public Estado(int numObjetivos, String nombreArchivo) {
 		this.numObjetivos = numObjetivos;
 		numAciertos=0;
 		objetivosAcertados=0;
@@ -186,10 +189,10 @@ public class Juego {
 		 do{
 			respuesta=false;
 			puntos = jugar(in);
-			
+			System.out.println("Puntos: " + puntos);
 			while(respuesta!=true) {
 				
-				System.out.println("¿Otra Partida?");  //jugarDeNuevo();	
+				System.out.println("¿Otra Partida?");  
 				
 				String opc=in.next().toLowerCase();
 				
@@ -211,51 +214,51 @@ public class Juego {
 		}while (loop);
 		in.close();
 		System.out.println("Programa terminado con exito");
-		System.out.println("Puntos: " + puntos);
+		
 
 	}
+	
 
 	public static int jugar(Scanner in) {
 
 		int puntos = 0;
 		String nombreArchivo = "bin\\Diccionario.txt";
-		Lista lista = new Lista(6, nombreArchivo);
-		lista.getObjetivos();
+		Estado estado = new Estado(6, nombreArchivo);
+		estado.getObjetivos();
 
-		System.out.println(lista.palabraObj);
-		System.out.println(desordenar(lista.palabraObj));
-
-		System.out.println("\n\n\nPalabras hijas:");
-
-		System.out.println("\n" + lista.lenHijas);
-		for (int i = 0; i < lista.lenHijas; i++) {
-			System.out.println(lista.hijas[i]);
-		}
-
-		System.out.println("\n\n\nPalabras objetivo:");
-
-		for ( int i = 0; i<lista.numObjetivos;i++) {
-			System.out.println(lista.objetivos[i]);
-		}
-
-		while (lista.objetivosAcertados < lista.numObjetivos) {
-			for (int i = 0; i < lista.numObjetivos; i++) {
+		
+		String palabraDesordenada=new String(desordenar(estado.palabraObj));
+		
+		System.out.println("Introduce todas las palabras objetivo ("+estado.numObjetivos+") o introduce \"/salir\" para terminar.");
+	
+		boolean salir=false;
+		while (estado.objetivosAcertados < estado.numObjetivos&&salir==false){
+			System.out.println();
+			System.out.println(palabraDesordenada);
+			System.out.println();
+			for (int i = 0; i < estado.numObjetivos; i++) {
 				
-				if(contiene(lista.aciertos, lista.objetivos[i], lista.numAciertos)) {
-					System.out.println(lista.objetivos[i]);
+				if(contiene(estado.aciertos, estado.objetivos[i], estado.numAciertos)) {
+					System.out.println(estado.objetivos[i]);
 				}else {
-					for(int cont=0;cont<lista.objetivos[i].length();cont++) {
+					for(int cont=0;cont<estado.objetivos[i].length();cont++) {
 						System.out.print("_ ");
 					}
 					System.out.println();
 				}
 				
 			}
-			puntos += plc_hldr(lista,in.next());
-
+			String entrada=in.next();
+			if(entrada.toLowerCase().equals("/salir")){
+				salir=true;
+			}else {
+			puntos += comprobarPalabra(estado,entrada);
+			}
 		}
+		if(estado.objetivosAcertados == estado.numObjetivos) {
 		System.out.println("¡¡Has acertado todas las palabras objetivo!!");
 		puntos+=25;
+		}
 		System.out.println("Pulsa enter para continuar");
 		in.nextLine();
 		in.nextLine();
@@ -265,20 +268,20 @@ public class Juego {
 	
 	
 
-	public static int plc_hldr(Lista lista, String entrada) {
+	public static int comprobarPalabra(Estado estado, String entrada) {
 		int puntos = 0;
 
-		if (lista.leer.estaEnArchivo(entrada)) {
-			if (contiene(lista.hijas, entrada, lista.lenHijas)) {
-				if (contiene(lista.aciertos, entrada, lista.numAciertos)) {
+		if (estado.leer.estaEnArchivo(entrada)) {
+			if (contiene(estado.hijas, entrada, estado.lenHijas)) {
+				if (contiene(estado.aciertos, entrada, estado.numAciertos)) {
 					System.out.println("Ya has introducido esa palabra");
-				} else if (contiene(lista.objetivos, entrada, lista.numObjetivos)) {
+				} else if (contiene(estado.objetivos, entrada, estado.numObjetivos)) {
 					System.out.println("Palabra objetivo encontrada");
-					lista.AñadirAciertosObj(entrada);
+					estado.AñadirAciertosObj(entrada);
 					
 				} else {
 					System.out.println("Palabra bonus encontrada");
-					lista.añadirAciertosBonus(entrada);
+					estado.añadirAciertosBonus(entrada);
 					puntos = 1;
 				}
 			} else {
@@ -331,5 +334,6 @@ public class Juego {
 		}
 		return desordenada;
 	}
+	
 
 }
