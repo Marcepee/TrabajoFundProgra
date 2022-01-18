@@ -16,19 +16,19 @@ class Estado{
 	int numObjetivos;
 	int objetivosAcertados;
 	
-	Lector leer;
+	Lector lector;
 
 	public Estado(int numObjetivos, String nombreArchivo) {
 		this.numObjetivos = numObjetivos;
 		numAciertos=0;
 		objetivosAcertados=0;
-		leer = new Lector(nombreArchivo);
+		lector = new Lector(nombreArchivo);
 		aciertos = new String[0];
 	}
 
 	private int numPalabrasAncestro() {
 		int cont = 0;
-		Scanner dc = leer.leerArchivo();
+		Scanner dc = lector.leerArchivo();	
 		while (dc.hasNextLine()) {
 			if (dc.nextLine().length() > 5) {
 				cont++;
@@ -38,11 +38,11 @@ class Estado{
 	}
 
 	private void setPalabraObj() {
-		Scanner dc = leer.leerArchivo();
+		Scanner dc = lector.leerArchivo();
 		int num = numPalabrasAncestro();
 		int seleccion = (int) ((num - 1) * Math.random());
 		String[] palabrasAncestro = new String[num];
-		for (int i = 0; i < num; i++) {
+		for (int i = 0; i < num; i++) {	
 			palabrasAncestro[i] = dc.nextLine();
 		}
 		palabraObj = palabrasAncestro[seleccion];
@@ -77,7 +77,7 @@ class Estado{
 
 	private void setLenHijas() {
 		lenHijas = 0;
-		Scanner dc = leer.leerArchivo();
+		Scanner dc = lector.leerArchivo();
 		while (dc.hasNextLine()) {
 			if (esHija(palabraObj, dc.nextLine())) {
 				lenHijas++;
@@ -90,7 +90,7 @@ class Estado{
 		setLenHijas();
 		int cont = 0;
 		hijas = new String[lenHijas];
-		Scanner dc = leer.leerArchivo();
+		Scanner dc = lector.leerArchivo();
 		while (dc.hasNextLine()) {
 			String lineaDic = dc.nextLine();
 
@@ -161,7 +161,7 @@ class Lector {
 			dc = new Scanner(new File(nombreArchivo));
 			return dc;
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			e.printStackTrace();	
 		}
 		return null;
 	}
@@ -183,14 +183,14 @@ public class Juego {
 	public static void main(String[] args) {
 		Scanner in = new Scanner(System.in);
 		in.useLocale(new Locale("es","ES"));
-		boolean loop=true;
-		boolean respuesta;
+		boolean repetir=true;
+		boolean respuestaValida;
 		int puntos = 0;
 		 do{
-			respuesta=false;
+			respuestaValida=false;
 			puntos = jugar(in);
 			System.out.println("Puntos: " + puntos);
-			while(respuesta!=true) {
+			while(respuestaValida==false) {
 				
 				System.out.println("¿Otra Partida?");  
 				
@@ -198,20 +198,20 @@ public class Juego {
 				
 				if(opc.equals("si")) {
 					
-					respuesta=true;
-					loop=true;
+					respuestaValida=true;
+					repetir=true;
 					
 				}else if(opc.equals("no")) {
 					
-					respuesta=true;
-					loop=false;
+					respuestaValida=true;
+					repetir=false;
 					
 				}
 				
 			}
 			
 			
-		}while (loop);
+		}while (repetir);
 		in.close();
 		System.out.println("Programa terminado con exito");
 		
@@ -262,7 +262,7 @@ public class Juego {
 		}
 		System.out.println("Pulsa enter para continuar");
 		in.nextLine();
-		in.nextLine();
+		in.nextLine(); 	
 
 		return puntos;
 	}
@@ -272,7 +272,7 @@ public class Juego {
 	public static int comprobarPalabra(Estado estado, String entrada) {
 		int puntos = 0;
 
-		if (estado.leer.estaEnArchivo(entrada)) {
+		if (estado.lector.estaEnArchivo(entrada)) {
 			if (contiene(estado.hijas, entrada, estado.lenHijas)) {
 				if (contiene(estado.aciertos, entrada, estado.numAciertos)) {
 					System.out.println("Ya has introducido esa palabra");
@@ -335,6 +335,8 @@ public class Juego {
 		}
 		return desordenada;
 	}
+	
+	
 	
 
 }
